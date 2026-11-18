@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
+	import { emojiFromCodePoints } from '$lib/utils/emojiUnicode';
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { tick, getContext, onMount } from 'svelte';
@@ -629,7 +630,7 @@
 				command: ({ editor, range, props }) => {
 					// Convert the Unicode hex codepoint (e.g. "1F44B") to the actual emoji character (👋)
 					const codepoint = props.id;
-					const emoji = String.fromCodePoint(parseInt(codepoint, 16));
+					const emoji = emojiFromCodePoints(codepoint);
 					editor.chain().focus().deleteRange(range).insertContent(emoji).run();
 				},
 				render: getSuggestionRenderer(CommandSuggestionList, {

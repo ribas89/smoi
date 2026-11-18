@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 
-	import { WEBUI_BASE_URL } from '$lib/constants';
+	import { emojiFromCodePoints } from '$lib/utils/emojiUnicode';
 	import emojiShortCodes from '$lib/emoji-shortcodes.json';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 
@@ -84,12 +84,13 @@
 			data-selected={emojiIdx === selectedIdx}
 		>
 			<div class="flex items-center gap-2 text-black dark:text-gray-100">
-				<img
-					src="{WEBUI_BASE_URL}/assets/emojis/{emoji.name.toLowerCase()}.svg"
-					alt={emoji.name}
-					class="size-5 flex-shrink-0"
-					loading="lazy"
-				/>
+				<span
+					class="inline-flex size-5 shrink-0 items-center justify-center text-lg leading-none"
+					role="img"
+					aria-label={emoji.shortCodes[0]}
+				>
+					{emojiFromCodePoints(emoji.name)}
+				</span>
 				<div class="truncate text-sm">
 					:{emoji.shortCodes[0]}:
 				</div>

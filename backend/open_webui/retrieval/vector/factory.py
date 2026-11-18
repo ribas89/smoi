@@ -1,3 +1,6 @@
+from threading import Lock
+from typing import Optional
+
 from open_webui.retrieval.vector.main import VectorDBBase
 from open_webui.retrieval.vector.type import VectorType
 from open_webui.config import (
@@ -84,4 +87,28 @@ class Vector:
                 raise ValueError(f'Unsupported vector type: {vector_type}')
 
 
-VECTOR_DB_CLIENT = Vector.get_vector(VECTOR_DB)
+class LazyVectorDBClient:
+    """Create the configured vector DB only on first use, not at import time.
+
+    Chat-only deployments can import routes without initializing Chroma or
+    other vector backends. A lock ensures only one client is created if
+    concurrent requests reach a vector feature for the first time.
+    """
+
+    def __init__(self, vector_type: str):
+        self._vector_type = vector_type
+        self._client: Optional[VectorDBBase] = None
+        self._lock = Lock()
+
+    def _get_client(self) -> VectorDBBase:
+        if self._client is None:
+            with self._lock:
+                if self._client is None:
+                    self._client = Vector.get_vector(self._vector_type)
+        return self._client
+
+    def __getattr__(self, name: str):
+        return getattr(self._get_client(), name)
+
+
+VECTOR_DB_CLIENT = LazyVectorDBClient(VECTOR_DB)

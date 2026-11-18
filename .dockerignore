@@ -18,3 +18,13 @@ uploads
 **/*.db
 _test
 backend/data/*
+
+# Lite: exclude unused fonts / obsolete PDF renderer to either build stage
+.git
+backend/open_webui/static/fonts/
+backend/open_webui/static/assets/pdf-style.css
+backend/open_webui/utils/pdf_generator.py
+static/assets/fonts/
+
+# Native Unicode emoji rendering - SVG bundle no longer required
+static/assets/emojis/

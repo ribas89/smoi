@@ -1054,7 +1054,7 @@ ENABLE_DIRECT_CONNECTIONS = PersistentConfig(
 ENABLE_OLLAMA_API = PersistentConfig(
     'ENABLE_OLLAMA_API',
     'ollama.enable',
-    os.environ.get('ENABLE_OLLAMA_API', 'True').lower() == 'true',
+    os.environ.get('ENABLE_OLLAMA_API', 'False').lower() == 'true',
 )
 
 OLLAMA_API_BASE_URL = os.environ.get('OLLAMA_API_BASE_URL', 'http://localhost:11434/api')
@@ -1658,13 +1658,13 @@ ENABLE_CHANNELS = PersistentConfig(
 ENABLE_CALENDAR = PersistentConfig(
     'ENABLE_CALENDAR',
     'calendar.enable',
-    os.environ.get('ENABLE_CALENDAR', 'True').lower() == 'true',
+    os.environ.get('ENABLE_CALENDAR', 'False').lower() == 'true',
 )
 
 ENABLE_AUTOMATIONS = PersistentConfig(
     'ENABLE_AUTOMATIONS',
     'automations.enable',
-    os.environ.get('ENABLE_AUTOMATIONS', 'True').lower() == 'true',
+    os.environ.get('ENABLE_AUTOMATIONS', 'False').lower() == 'true',
 )
 
 AUTOMATION_MAX_COUNT = PersistentConfig(
@@ -1682,7 +1682,7 @@ AUTOMATION_MIN_INTERVAL = PersistentConfig(
 ENABLE_NOTES = PersistentConfig(
     'ENABLE_NOTES',
     'notes.enable',
-    os.environ.get('ENABLE_NOTES', 'True').lower() == 'true',
+    os.environ.get('ENABLE_NOTES', 'False').lower() == 'true',
 )
 
 ENABLE_USER_STATUS = PersistentConfig(
@@ -1694,7 +1694,7 @@ ENABLE_USER_STATUS = PersistentConfig(
 ENABLE_EVALUATION_ARENA_MODELS = PersistentConfig(
     'ENABLE_EVALUATION_ARENA_MODELS',
     'evaluation.arena.enable',
-    os.environ.get('ENABLE_EVALUATION_ARENA_MODELS', 'True').lower() == 'true',
+    os.environ.get('ENABLE_EVALUATION_ARENA_MODELS', 'False').lower() == 'true',
 )
 EVALUATION_ARENA_MODELS = PersistentConfig(
     'EVALUATION_ARENA_MODELS',
@@ -1952,13 +1952,13 @@ JSON format: { "follow_ups": ["Question 1?", "Question 2?", "Question 3?"] }
 ENABLE_FOLLOW_UP_GENERATION = PersistentConfig(
     'ENABLE_FOLLOW_UP_GENERATION',
     'task.follow_up.enable',
-    os.environ.get('ENABLE_FOLLOW_UP_GENERATION', 'True').lower() == 'true',
+    os.environ.get('ENABLE_FOLLOW_UP_GENERATION', 'False').lower() == 'true',
 )
 
 ENABLE_TAGS_GENERATION = PersistentConfig(
     'ENABLE_TAGS_GENERATION',
     'task.tags.enable',
-    os.environ.get('ENABLE_TAGS_GENERATION', 'True').lower() == 'true',
+    os.environ.get('ENABLE_TAGS_GENERATION', 'False').lower() == 'true',
 )
 
 ENABLE_TITLE_GENERATION = PersistentConfig(
@@ -1971,13 +1971,13 @@ ENABLE_TITLE_GENERATION = PersistentConfig(
 ENABLE_SEARCH_QUERY_GENERATION = PersistentConfig(
     'ENABLE_SEARCH_QUERY_GENERATION',
     'task.query.search.enable',
-    os.environ.get('ENABLE_SEARCH_QUERY_GENERATION', 'True').lower() == 'true',
+    os.environ.get('ENABLE_SEARCH_QUERY_GENERATION', 'False').lower() == 'true',
 )
 
 ENABLE_RETRIEVAL_QUERY_GENERATION = PersistentConfig(
     'ENABLE_RETRIEVAL_QUERY_GENERATION',
     'task.query.retrieval.enable',
-    os.environ.get('ENABLE_RETRIEVAL_QUERY_GENERATION', 'True').lower() == 'true',
+    os.environ.get('ENABLE_RETRIEVAL_QUERY_GENERATION', 'False').lower() == 'true',
 )
 
 
@@ -2159,7 +2159,7 @@ Responses from models: {{responses}}"""
 ENABLE_CODE_EXECUTION = PersistentConfig(
     'ENABLE_CODE_EXECUTION',
     'code_execution.enable',
-    os.environ.get('ENABLE_CODE_EXECUTION', 'True').lower() == 'true',
+    os.environ.get('ENABLE_CODE_EXECUTION', 'False').lower() == 'true',
 )
 
 CODE_EXECUTION_ENGINE = PersistentConfig(
@@ -2202,13 +2202,13 @@ CODE_EXECUTION_JUPYTER_TIMEOUT = PersistentConfig(
 ENABLE_CODE_INTERPRETER = PersistentConfig(
     'ENABLE_CODE_INTERPRETER',
     'code_interpreter.enable',
-    os.environ.get('ENABLE_CODE_INTERPRETER', 'True').lower() == 'true',
+    os.environ.get('ENABLE_CODE_INTERPRETER', 'False').lower() == 'true',
 )
 
 ENABLE_MEMORIES = PersistentConfig(
     'ENABLE_MEMORIES',
     'memories.enable',
-    os.environ.get('ENABLE_MEMORIES', 'True').lower() == 'true',
+    os.environ.get('ENABLE_MEMORIES', 'False').lower() == 'true',
 )
 
 CODE_INTERPRETER_ENGINE = PersistentConfig(
@@ -2315,10 +2315,10 @@ VECTOR_DB = os.environ.get('VECTOR_DB', 'chroma')
 CHROMA_DATA_PATH = f'{DATA_DIR}/vector_db'
 
 if VECTOR_DB == 'chroma':
-    import chromadb
-
-    CHROMA_TENANT = os.environ.get('CHROMA_TENANT', chromadb.DEFAULT_TENANT)
-    CHROMA_DATABASE = os.environ.get('CHROMA_DATABASE', chromadb.DEFAULT_DATABASE)
+    # These are Chroma's standard default names. Do not import ChromaDB
+    # (and its transitive dependencies) just to obtain two constants.
+    CHROMA_TENANT = os.environ.get('CHROMA_TENANT', 'default_tenant')
+    CHROMA_DATABASE = os.environ.get('CHROMA_DATABASE', 'default_database')
     CHROMA_HTTP_HOST = os.environ.get('CHROMA_HTTP_HOST', '')
     CHROMA_HTTP_PORT = int(os.environ.get('CHROMA_HTTP_PORT', '8000'))
     CHROMA_CLIENT_AUTH_PROVIDER = os.environ.get('CHROMA_CLIENT_AUTH_PROVIDER', '')
@@ -2880,7 +2880,7 @@ PADDLEOCR_VL_TOKEN = PersistentConfig(
 BYPASS_EMBEDDING_AND_RETRIEVAL = PersistentConfig(
     'BYPASS_EMBEDDING_AND_RETRIEVAL',
     'rag.bypass_embedding_and_retrieval',
-    os.environ.get('BYPASS_EMBEDDING_AND_RETRIEVAL', 'False').lower() == 'true',
+    os.environ.get('BYPASS_EMBEDDING_AND_RETRIEVAL', 'True').lower() == 'true',
 )
 
 
@@ -3635,7 +3635,7 @@ IMAGE_STEPS = PersistentConfig('IMAGE_STEPS', 'image_generation.steps', int(os.g
 ENABLE_IMAGE_PROMPT_GENERATION = PersistentConfig(
     'ENABLE_IMAGE_PROMPT_GENERATION',
     'image_generation.prompt.enable',
-    os.environ.get('ENABLE_IMAGE_PROMPT_GENERATION', 'true').lower() == 'true',
+    os.environ.get('ENABLE_IMAGE_PROMPT_GENERATION', 'false').lower() == 'true',
 )
 
 AUTOMATIC1111_BASE_URL = PersistentConfig(

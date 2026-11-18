@@ -11,7 +11,6 @@ import time
 import re
 
 from urllib.parse import quote
-from huggingface_hub import snapshot_download
 from langchain_classic.retrievers import (
     ContextualCompressionRetriever,
     EnsembleRetriever,
@@ -1397,6 +1396,8 @@ def get_model_path(model: str, update_model: bool = False):
 
     # Attempt to query the huggingface_hub library to determine the local path and/or to update
     try:
+        from huggingface_hub import snapshot_download
+
         model_repo_path = snapshot_download(**snapshot_kwargs)
         log.debug(f'model_repo_path: {model_repo_path}')
         return model_repo_path

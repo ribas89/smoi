@@ -1,5 +1,5 @@
 <script>
-	import { WEBUI_BASE_URL } from '$lib/constants';
+	import { emojiFromCodePoints } from '$lib/utils/emojiUnicode';
 	import { shortCodesToEmojis } from '$lib/stores';
 
 	export let shortCode;
@@ -7,12 +7,13 @@
 </script>
 
 {#if $shortCodesToEmojis[shortCode]}
-	<img
-		src="{WEBUI_BASE_URL}/assets/emojis/{$shortCodesToEmojis[shortCode].toLowerCase()}.svg"
-		alt={shortCode}
-		class={className}
-		loading="lazy"
-	/>
+	<span
+		class="inline-flex shrink-0 items-center justify-center align-middle leading-none {className}"
+		role="img"
+		aria-label={shortCode}
+	>
+		{emojiFromCodePoints($shortCodesToEmojis[shortCode])}
+	</span>
 {:else}
 	<div>
 		{shortCode}

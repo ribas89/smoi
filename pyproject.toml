@@ -1,6 +1,6 @@
 [project]
 name = "open-webui"
-description = "Open WebUI"
+description = "smoi - a lightweight Open WebUI fork"
 authors = [
     { name = "Timothy Jaeryang Baek", email = "tim@openwebui.com" }
 ]
@@ -76,7 +76,6 @@ dependencies = [
     "ftfy==6.3.1",
     "chardet==5.2.0",
     "pypdf==6.7.5",
-    "fpdf2==2.8.7",
     "pymdown-extensions==10.21",
     "docx2txt==0.9",
     "python-pptx==1.0.2",
@@ -171,9 +170,6 @@ all = [
     "unstructured==0.18.31",
 ]
 
-[project.scripts]
-open-webui = "open_webui:app"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -204,7 +200,7 @@ exclude = [
     "webui.db",
     "chroma.sqlite3",
 ]
-force-include = { "CHANGELOG.md" = "open_webui/CHANGELOG.md", build = "open_webui/frontend" }
+force-include = { build = "open_webui/frontend" }
 
 [tool.codespell]
 # Ref: https://github.com/codespell-project/codespell#using-a-config-file

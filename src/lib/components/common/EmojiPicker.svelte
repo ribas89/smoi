@@ -3,7 +3,7 @@
 
 	import { getContext } from 'svelte';
 
-	import { WEBUI_BASE_URL } from '$lib/constants';
+	import { emojiFromCodePoints } from '$lib/utils/emojiUnicode';
 
 	import Dropdown from '$lib/components/common/Dropdown.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
@@ -206,12 +206,13 @@
 														: ''}"
 													on:click={() => selectEmoji(emojiItem)}
 												>
-													<img
-														src="{WEBUI_BASE_URL}/assets/emojis/{emojiItem.name.toLowerCase()}.svg"
-														alt={emojiItem.name}
-														class="size-5"
-														loading="lazy"
-													/>
+													<span
+														class="inline-flex size-5 shrink-0 items-center justify-center text-lg leading-none"
+														role="img"
+														aria-label={emojiItem.shortCodes[0]}
+													>
+														{emojiFromCodePoints(emojiItem.name)}
+													</span>
 												</button>
 											</Tooltip>
 										{/each}

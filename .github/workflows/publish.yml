@@ -1,0 +1,136 @@
+name: Publish smoi
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: smoi-ghcr-publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set image name
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/smoi" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: docker
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
+          build-args: |
+            BUILD_HASH=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=smoi
+            org.opencontainers.image.description=Small Open WebUI - Lightweight interface for OpenAI-compatible completion gateways
+
+      - name: Save architecture digest
+        shell: bash
+        env:
+          DIGEST: ${{ steps.docker.outputs.digest }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          mkdir -p /tmp/image-digests
+          printf '%s\n' "$DIGEST" > "/tmp/image-digests/${ARCH}"
+
+      - name: Upload architecture digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-digest-${{ matrix.arch }}
+          path: /tmp/image-digests/${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Publish SHA and latest
+    needs: build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Set image name
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/smoi" >> "$GITHUB_OUTPUT"
+
+      - name: Download architecture digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: image-digest-*
+          path: /tmp/image-digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish multi-architecture manifest
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          AMD64_DIGEST="$(cat /tmp/image-digests/amd64)"
+          ARM64_DIGEST="$(cat /tmp/image-digests/arm64)"
+
+          docker buildx imagetools create \
+            --tag "${IMAGE}:${COMMIT_SHA}" \
+            --tag "${IMAGE}:latest" \
+            "${IMAGE}@${AMD64_DIGEST}" \
+            "${IMAGE}@${ARM64_DIGEST}"
+
+          docker buildx imagetools inspect "${IMAGE}:${COMMIT_SHA}"
+
+          {
+            echo '### smoi published to GHCR'
+            echo "- \`${IMAGE}:${COMMIT_SHA}\`"
+            echo "- \`${IMAGE}:latest\`"
+            echo '- Architectures: `linux/amd64`, `linux/arm64`'
+          } >> "$GITHUB_STEP_SUMMARY"

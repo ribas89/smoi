@@ -620,19 +620,7 @@ class SPAStaticFiles(StaticFiles):
 
 
 if LOG_FORMAT != 'json':
-    print(rf"""
- ██████╗ ██████╗ ███████╗███╗   ██╗    ██╗    ██╗███████╗██████╗ ██╗   ██╗██╗
-██╔═══██╗██╔══██╗██╔════╝████╗  ██║    ██║    ██║██╔════╝██╔══██╗██║   ██║██║
-██║   ██║██████╔╝█████╗  ██╔██╗ ██║    ██║ █╗ ██║█████╗  ██████╔╝██║   ██║██║
-██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║    ██║███╗██║██╔══╝  ██╔══██╗██║   ██║██║
-╚██████╔╝██║     ███████╗██║ ╚████║    ╚███╔███╔╝███████╗██████╔╝╚██████╔╝██║
- ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝     ╚══╝╚══╝ ╚══════╝╚═════╝  ╚═════╝ ╚═╝
-
-
-v{VERSION} - building the best AI user interface.
-{f'Commit: {WEBUI_BUILD_HASH}' if WEBUI_BUILD_HASH != 'dev-build' else ''}
-https://github.com/open-webui/open-webui
-""")
+    print(f'smoi | Open WebUI 0.9.4 fork | {WEBUI_BUILD_HASH}')
 
 
 @asynccontextmanager
@@ -755,7 +743,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title='Open WebUI',
+    title='smoi',
     docs_url='/docs' if ENV == 'dev' else None,
     openapi_url='/openapi.json' if ENV == 'dev' else None,
     redoc_url=None,
@@ -1162,7 +1150,9 @@ app.state.YOUTUBE_LOADER_TRANSLATION = None
 
 
 try:
-    app.state.ef = get_ef(app.state.config.RAG_EMBEDDING_ENGINE, app.state.config.RAG_EMBEDDING_MODEL)
+    # Avoid loading local embedding weights in chat-only deployments.
+    if not app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
+        app.state.ef = get_ef(app.state.config.RAG_EMBEDDING_ENGINE, app.state.config.RAG_EMBEDDING_MODEL)
     if app.state.config.ENABLE_RAG_HYBRID_SEARCH and not app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
         app.state.rf = get_rf(
             app.state.config.RAG_RERANKING_ENGINE,
@@ -2338,14 +2328,7 @@ async def get_app_config(request: Request):
         if data is not None and 'id' in data:
             user = await Users.get_user_by_id(data['id'])
 
-    user_count = await Users.get_num_users()
-    onboarding = False
-
-    if user is None:
-        onboarding = user_count == 0
-
     return {
-        **({'onboarding': True} if onboarding else {}),
         'status': True,
         'name': app.state.WEBUI_NAME,
         'version': VERSION,
@@ -2406,7 +2389,7 @@ async def get_app_config(request: Request):
                 'default_models': app.state.config.DEFAULT_MODELS,
                 'default_pinned_models': app.state.config.DEFAULT_PINNED_MODELS,
                 'default_prompt_suggestions': app.state.config.DEFAULT_PROMPT_SUGGESTIONS,
-                'user_count': user_count,
+                'user_count': await Users.get_num_users(),
                 'code': {
                     'engine': app.state.config.CODE_EXECUTION_ENGINE,
                     'interpreter_engine': app.state.config.CODE_INTERPRETER_ENGINE,
@@ -2796,21 +2779,21 @@ async def get_manifest_json():
         return {
             'name': app.state.WEBUI_NAME,
             'short_name': app.state.WEBUI_NAME,
-            'description': f'{app.state.WEBUI_NAME} is an open, extensible, user-friendly interface for AI that adapts to your workflow.',
+            'description': 'A lightweight interface for external completion gateways.',
             'start_url': '/',
             'display': 'standalone',
             'background_color': '#343541',
             'icons': [
                 {
-                    'src': '/static/logo.png',
+                    'src': '/static/web-app-manifest-192x192.png',
                     'type': 'image/png',
-                    'sizes': '500x500',
+                    'sizes': '192x192',
                     'purpose': 'any',
                 },
                 {
-                    'src': '/static/logo.png',
+                    'src': '/static/web-app-manifest-512x512.png',
                     'type': 'image/png',
-                    'sizes': '500x500',
+                    'sizes': '512x512',
                     'purpose': 'maskable',
                 },
             ],
