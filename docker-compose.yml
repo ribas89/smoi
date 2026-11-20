@@ -1,0 +1,13 @@
+services:
+  smoi:
+    image: ghcr.io/example/smoi:latest
+    container_name: smoi
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - "./data:/data"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

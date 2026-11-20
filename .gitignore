@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+data/
+frontend/node_modules/
+frontend/dist/
+backend/static/dist/assets/
+*.db
+*.db-wal
+*.db-shm
+*.log
+.DS_Store
